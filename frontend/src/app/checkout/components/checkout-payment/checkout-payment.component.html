@@ -1,0 +1,46 @@
+<div class="alert alert-danger" role="alert" *ngIf="paymentErrorMessage">
+    {{ paymentErrorMessage }}
+</div>
+<ng-container *ngFor="let paymentMethod of paymentMethods$ | async">
+    <h4 class="font-medium">Pay with method "{{ paymentMethod.code }}"</h4>
+    <div class="alert alert-info my-4" role="alert">
+        This is an example payment form. Do not use real card details!
+    </div>
+    <form class="border bg-white rounded p-4 max-w-sm" #paymentForm="ngForm" (submit)="completeOrder(paymentMethod.code)">
+        <div class="flex items-center space-x-2">
+            <div class="w-16 text-gray-600">
+                <fa-icon icon="credit-card"></fa-icon>
+            </div>
+            <input type="text"
+                   class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                   name="cardNumber"
+                   [required]="true"
+                   [(ngModel)]="cardNumber"
+                   placeholder="Credit card #">
+        </div>
+
+        <div class="flex items-center mt-4 space-x-2">
+            <label class="w-16 text-gray-600" for="month">Expiry</label>
+            <select
+                class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                id="month" name="expMonth" [(ngModel)]="expMonth" [required]="true">
+                <option selected [ngValue]="undefined">Month</option>
+                <option *ngFor="let month of getMonths()" [ngValue]="month">
+                    {{ month }}
+                </option>
+            </select>
+            <select
+                class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                id="year" name="expYear" [(ngModel)]="expYear" [required]="true">
+                <option selected [ngValue]="undefined">Year</option>
+                <option *ngFor="let year of getYears()" [ngValue]="year">
+                    {{ year }}
+                </option>
+            </select>
+
+        </div>
+        <button class="btn-primary w-full mt-6"
+                [disabled]="paymentForm.pristine || paymentForm.invalid">Complete order
+        </button>
+    </form>
+</ng-container>
