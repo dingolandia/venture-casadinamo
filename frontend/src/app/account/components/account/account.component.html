@@ -6,32 +6,32 @@
                    [routerLink]="['./']"
                    [routerLinkActiveOptions]="{ exact: true }"
                    routerLinkActive="bg-primary-50 border-primary-100 text-primary-600">
-                    Dashboard
+                    Painel
                 </a>
                 <a class="text-gray-600 hover:bg-primary-50 hover:text-gray-900 border border-transparent flex items-center px-3 py-2 text-sm font-medium rounded-md"
                    [routerLink]="['./', 'orders']"
                    routerLinkActive="bg-primary-50 border-primary-100 text-primary-600">
-                    Orders
+                    Pedidos
                 </a>
                 <a class="text-gray-600 hover:bg-primary-50 hover:text-gray-900 border border-transparent flex items-center px-3 py-2 text-sm font-medium rounded-md"
                    [routerLink]="['./', 'address-book']"
                    routerLinkActive="bg-primary-50 border-primary-100 text-primary-600">
-                    Address book
+                    Livro de endereços
                 </a>
                 <a class="text-gray-600 hover:bg-primary-50 hover:text-gray-900 border border-transparent flex items-center px-3 py-2 text-sm font-medium rounded-md"
                    [routerLink]="['./', 'details']"
                    routerLinkActive="bg-primary-50 border-primary-100 text-primary-600">
-                    Personal details
+                    Dados pessoais
                 </a>
                 <a class="text-gray-600 hover:bg-primary-50 hover:text-gray-900 border border-transparent flex items-center px-3 py-2 text-sm font-medium rounded-md"
                    [routerLink]="['./', 'change-credentials']"
                    routerLinkActive="bg-primary-50 border-primary-100 text-primary-600">
-                    Change credentials
+                    Alterar credenciais
                 </a>
             </div>
 
             <div class="px-3 py-2 mt-12 border-t">
-                <button class="text-gray-700 hover:text-primary-600 text-sm" (click)="signOut()">Sign out</button>
+                <button class="text-gray-700 hover:text-primary-600 text-sm" (click)="signOut()">Sair</button>
             </div>
         </div>
         <div class="px-6" [class.col-span-3]="isSignedIn$ | async">

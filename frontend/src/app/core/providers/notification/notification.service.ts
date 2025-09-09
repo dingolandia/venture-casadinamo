@@ -55,7 +55,7 @@ export class NotificationService {
 
     error(message: string) {
         return this.notify({
-            title: 'An error occurred',
+            title: 'Ocorreu um erro',
             message,
             duration: 10000,
             type: 'error',
@@ -64,7 +64,7 @@ export class NotificationService {
 
     success(message: string) {
         return this.notify({
-            title: 'Success',
+            title: 'Sucesso',
             message,
             duration: 5000,
             type: 'error',
@@ -73,7 +73,7 @@ export class NotificationService {
 
     info(message: string) {
         return this.notify({
-            title: 'Information',
+            title: 'Informação',
             message,
             duration: 5000,
             type: 'info',

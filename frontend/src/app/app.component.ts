@@ -21,13 +21,13 @@ export class AppComponent implements OnInit {
 
     navigation = {
         support: [
-            {name: 'Help', href: '#'},
+        {name: 'Ajuda', href: '#'},
             {name: 'Track order', href: '#'},
             {name: 'Shipping', href: '#'},
             {name: 'Returns', href: '#'},
         ],
         company: [
-            {name: 'About', href: '#'},
+        {name: 'Sobre', href: '#'},
             {name: 'Blog', href: '#'},
             {name: 'Corporate responsibility', href: '#'},
             {name: 'Press', href: '#'},

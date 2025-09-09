@@ -1,23 +1,23 @@
 <div *ngIf="order$ | async as order">
     <div class="text-center">
-        <h2 class="text-3xl">Thank you for your order!</h2>
+        <h2 class="text-3xl">Obrigado pelo seu pedido!</h2>
         <ul class="mt-4">
-            <li class="space-x-2"><span class="">Order code:</span><span
+            <li class="space-x-2"><span class="">Código do pedido:</span><span
                 class="text-gray-600 font-medium">{{ order.code }}</span></li>
-            <li class="space-x-2"><span class="">Placed:</span><span
+            <li class="space-x-2"><span class="">Realizado:</span><span
                 class="text-gray-600 font-medium">{{ order.updatedAt | date: 'medium' }}</span></li>
         </ul>
     </div>
 
     <div *ngIf="!order.customer.user" class="border rounded bg-white max-w-md mx-auto p-4 my-4">
-        <p class="lead">Create an account to enjoy faster checkouts, order tracking, order history and more!</p>
+        <p class="lead">Crie uma conta para desfrutar de checkouts mais rápidos, rastreamento de pedidos, histórico de pedidos e muito mais!</p>
         <button class="btn-primary mx-auto mt-6 block"
                 (click)="register()"
                 [disabled]="registrationSent">
-            Create account
+            Criar conta
         </button>
         <div *ngIf="registrationSent" class="mt-4 border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            Great! Now check your email ({{ order.customer.emailAddress }}) to complete registration.
+            Ótimo! Agora verifique seu email ({{ order.customer.emailAddress }}) para completar o registro.
         </div>
     </div>
     <div class="mt-12">
@@ -27,5 +27,5 @@
     </div>
 </div>
 <ng-container *ngIf="notFound$ | async">
-    <h2 class="display-4">Page not found</h2>
+    <h2 class="display-4">Página não encontrada</h2>
 </ng-container>

@@ -23,11 +23,11 @@ export type DropdownPosition = 'top' | 'right' | 'bottom' | 'left' | 'top-left' 
  * ```
  * <vsf-dropdown #dropdown [position]="['top']">
  *
- *     <button vsfDropdownTrigger class="btn btn-secondary">Open it!</button>
+ *     <button vsfDropdownTrigger class="btn btn-secondary">Abrir!</button>
  *
  *     <div class="card" vsfDropdownContent>
  *         <p>Here's the dropdown content!</p>
- *         <button class="btn" (click)="dropdown.close()">Close</button>
+ *         <button class="btn" (click)="dropdown.close()">Fechar</button>
  *     </div>
  *
  * </vsf-dropdown>

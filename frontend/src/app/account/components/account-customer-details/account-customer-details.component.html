@@ -2,19 +2,19 @@
     <vsf-centered-card class="block max-w-sm">
         <form [formGroup]="form">
             <div class="text-left mb-2">
-                <label for="firstName" class="text-sm text-gray-600">First name</label>
+                <label for="firstName" class="text-sm text-gray-600">Nome</label>
                 <div class="col-sm-9">
                     <input class="input-text" formControlName="firstName" id="firstName">
                 </div>
             </div>
             <div class="text-left mb-2">
-                <label for="lastName" class="text-sm text-gray-600">Last name</label>
+                <label for="lastName" class="text-sm text-gray-600">Sobrenome</label>
                 <div class="col-sm-9">
                     <input class="input-text" formControlName="lastName" id="lastName">
                 </div>
             </div>
             <div class="text-left mb-2">
-                <label for="phoneNumber" class="text-sm text-gray-600">Phone number</label>
+                <label for="phoneNumber" class="text-sm text-gray-600">Número de telefone</label>
                 <div class="col-sm-9">
                     <input class="input-text" formControlName="phoneNumber" id="phoneNumber">
                 </div>
@@ -22,7 +22,7 @@
         </form>
         <button class="btn-primary mt-3"
                 [disabled]="form.invalid || form.pristine"
-                (click)="updateDetails()">Update Details
+                (click)="updateDetails()">Atualizar Dados
         </button>
     </vsf-centered-card>
 </ng-container>

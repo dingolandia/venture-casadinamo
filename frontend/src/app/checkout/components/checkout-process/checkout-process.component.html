@@ -1,6 +1,6 @@
 <div class="bg-gray-50" *ngIf="activeStage$ | async as activeStage">
     <div class="lg:max-w-7xl max-w-2xl mx-auto pt-8 pb-24 px-4 sm:px-6 lg:px-8">
-        <h2 class="sr-only">Checkout</h2>
+        <h2 class="sr-only">Finalizar compra</h2>
         <vsf-checkout-stage-indicator [activeStage]="activeStage"
                                       [signedIn]="signedIn$ | async"></vsf-checkout-stage-indicator>
 
@@ -13,11 +13,11 @@
                 <vsf-cart-totals [cart]="cart"></vsf-cart-totals>
                 <vsf-address-card *ngIf="cart.shippingAddress?.streetLine1"
                                   class="w-48 block"
-                                  title="Shipping address"
+                                  title="Endereço de entrega"
                                   [address]="cart.shippingAddress">
                     <button class="border px-2 py-1 mt-2 rounded text-sm hover:bg-gray-100"
                             *ngIf="(activeStage$ | async) === 3"
-                            (click)="changeShippingAddress()">Change
+                            (click)="changeShippingAddress()">Alterar
                     </button>
                 </vsf-address-card>
             </div>

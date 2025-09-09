@@ -48,7 +48,7 @@ export class ModalService {
      * <ng-template vsfDialogButtons>
      *     <button type="button"
      *             class="btn"
-     *             (click)="cancel()">Cancel</button>
+     *             (click)="cancel()">Cancelar</button>
      *     <button type="button"
      *             class="btn btn-primary"
      *             (click)="okay()">Okay</button>

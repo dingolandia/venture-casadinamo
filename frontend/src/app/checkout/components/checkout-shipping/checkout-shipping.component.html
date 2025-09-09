@@ -1,6 +1,6 @@
 <div class="card" *ngIf="(signedIn$ | async) && (customerAddresses$ | async)?.length">
     <div class="card-header">
-        <button class="btn btn-light" (click)="step = 'selectAddress'">Select Address</button>
+        <button class="btn btn-light" (click)="step = 'selectAddress'">Selecionar Endereço</button>
     </div>
     <div class="" [ngClass]="step === 'selectAddress' ? 'block' : 'hidden'">
         <div class="d-flex flex-wrap">
@@ -12,14 +12,14 @@
                 </div>
             </div>
             <div class="d-flex align-items-end ml-3 mb-3">
-                <button class="btn btn-secondary" (click)="createAddress()">Add new address</button>
+                <button class="btn btn-secondary" (click)="createAddress()">Adicionar novo endereço</button>
             </div>
         </div>
     </div>
 </div>
 <div class="" *ngIf="!(signedIn$ | async)">
     <h2 class="text-lg font-medium text-gray-900">
-        Contact information
+        Informações de contato
     </h2>
     <form [formGroup]="contactForm" (focusout)="onCustomerFormBlur()">
         <div class="mt-4">
@@ -27,7 +27,7 @@
                 htmlFor="emailAddress"
                 class="block text-sm font-medium text-gray-700"
             >
-                Email address
+                Endereço de email
             </label>
             <div class="mt-1">
                 <input
@@ -46,7 +46,7 @@
                     htmlFor="firstName"
                     class="block text-sm font-medium text-gray-700"
                 >
-                    First name
+                    Nome
                 </label>
                 <div class="mt-1">
                     <input
@@ -65,7 +65,7 @@
                     htmlFor="lastName"
                     class="block text-sm font-medium text-gray-700"
                 >
-                    Last name
+                    Sobrenome
                 </label>
                 <div class="mt-1">
                     <input
@@ -84,7 +84,7 @@
 
 <div class="mt-10 border-t border-gray-200 pt-10">
     <h2 class="text-lg font-medium text-gray-900">
-        Shipping Address
+        Endereço de Entrega
     </h2>
     <div class="card-body">
         <vsf-address-form #addressForm
@@ -95,7 +95,7 @@
 </div>
 <div class="mt-10 border-t border-gray-200 pt-10">
     <h2 class="text-lg font-medium text-gray-900">
-        Shipping Method
+        Método de Entrega
     </h2>
     <vsf-radio-card-fieldset
         [idFn]="getId"
@@ -118,5 +118,5 @@
         [disabled]="!shippingMethodId || addressForm.invalid"
         (click)="proceedToPayment()">
     <fa-icon icon="credit-card"></fa-icon>
-    <span>Proceed to payment</span>
+    <span>Prosseguir para pagamento</span>
 </button>

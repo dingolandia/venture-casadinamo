@@ -14,7 +14,7 @@
                     <div class="flex h-full flex-col bg-white shadow-xl">
                         <div class="flex-1 height-full flex flex-col overflow-y-hidden py-6 px-4 sm:px-6">
                             <div class="flex items-center justify-between px-4">
-                                <h3 class="text-lg font-medium text-gray-900">Shopping Cart</h3>
+                                <h3 class="text-lg font-medium text-gray-900">Carrinho de Compras</h3>
                                 <button class="btn" (click)="close.emit()">
                                     <fa-icon icon="times" class="text-gray-400"></fa-icon>
                                 </button>
@@ -28,7 +28,7 @@
 
                             <ng-template #empty>
                                 <div class="flex items-center justify-center h-48 text-xl text-gray-400">
-                                    Your cart is empty
+                                    Seu carrinho está vazio
                                 </div>
                             </ng-template>
                         </div>
@@ -40,14 +40,14 @@
                                 </p>
                             </div>
                             <p class="mt-0.5 text-sm text-gray-500">
-                                Shipping will be calculated at
+                                O frete será calculado no
                                 checkout.
                             </p>
                             <div class="mt-6">
                                 <button (click)="close.emit()"
                                         [routerLink]="['/checkout']"
                                         class="btn-primary flex w-full">
-                                    Checkout
+                                    Finalizar Compra
                                 </button>
                             </div>
                         </div>
