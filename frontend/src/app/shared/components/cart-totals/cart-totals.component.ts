@@ -7,8 +7,17 @@ import { CartFragment } from '../../../common/generated-types';
   styleUrls: ['./cart-totals.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CartTotalsComponent implements OnInit {
+export class CartTotalsComponent {
     @Input() cart: CartFragment;
+
+    formatShippingName(method: any): string {
+        if (method && method.metadata && method.metadata.melhorEnvio) {
+            const me = method.metadata.melhorEnvio;
+            return `${me.carrierName} - ${me.serviceName}`;
+        }
+        return method && method.name ? method.name.replace('Melhor Envio - ', '') : '';
+    }
+}
   constructor() { }
 
   ngOnInit(): void {

@@ -16,6 +16,8 @@ import {
     faSearch,
     faShoppingCart, faStar,
     faTimes,
+    faTruck,
+    faBox,
     faUserCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -44,5 +46,7 @@ export function buildIconLibrary(library: FaIconLibrary) {
         faStar,
         faChevronRight,
         faCheck,
+        faTruck,
+        faBox,
     );
 }

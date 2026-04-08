@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between">
         <dt class="text-sm">
             Entrega
-            <span class="text-gray-600">(<span class="" *ngFor="let line of cart.shippingLines">{{ line.shippingMethod.name }}</span>)</span>
+            <span class="text-gray-600" *ngIf="cart.shippingLines?.length">(<span class="" *ngFor="let line of cart.shippingLines">{{ formatShippingName(line.shippingMethod) }}</span>)</span>
         </dt>
         <dd class="text-sm font-medium text-gray-900">
             {{ cart.shippingWithTax | formatPrice }}

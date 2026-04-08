@@ -104,8 +104,14 @@
     >
         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
             <vsf-radio-card *ngFor="let method of eligibleShippingMethods$ | async" [item]="method">
-                <span class="block text-sm font-medium text-gray-900">
-                    {{ method.name }}
+                <span class="flex items-center gap-3 block text-sm font-medium text-gray-900">
+                    <ng-container *ngIf="getShippingIcon(method); else noLogo">
+                        <img [src]="getShippingIcon(method)" alt="Transportadora" class="h-6 object-contain">
+                    </ng-container>
+                    <ng-template #noLogo>
+                        <fa-icon icon="box" class="text-primary-600 text-lg"></fa-icon>
+                    </ng-template>
+                    {{ formatShippingName(method) }}
                 </span>
                 <span class="mt-6 text-sm font-medium text-gray-900">
                     {{ method.priceWithTax | formatPrice }}

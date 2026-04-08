@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of, Subject } from 'rxjs';
-import { map, mergeMap, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { map, mergeMap, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 
 import {
     AddressFragment,
@@ -151,12 +151,42 @@ export class CheckoutShippingComponent implements OnInit, OnDestroy {
         this.dataService.mutate<SetShippingAddressMutation, SetShippingAddressMutationVariables>(SET_SHIPPING_ADDRESS, {
             input,
         }).subscribe(data => {
-            this.changeDetector.markForCheck();
+            this.dataService.query(GET_ORDER_SHIPPING_DATA, {}, 'network-only').subscribe(() => {
+                this.dataService.query(GET_ELIGIBLE_SHIPPING_METHODS, {}, 'network-only').subscribe(() => {
+                    this.changeDetector.markForCheck();
+                });
+            });
         });
     }
 
     setShippingMethod(id: string) {
         this.shippingMethodId = id;
+        this.stateService.select(state => state.signedIn).pipe(
+            take(1),
+            mergeMap(signedIn => !signedIn ? this.setCustomerForOrder() || of({}) : of({})),
+            mergeMap(() =>
+                this.dataService.mutate<SetShippingMethodMutation, SetShippingMethodMutationVariables>(SET_SHIPPING_METHOD, {
+                    id,
+                })
+            )
+        ).subscribe(() => {
+            this.changeDetector.markForCheck();
+        });
+    }
+
+    formatShippingName(method: any): string {
+        if (method.metadata && method.metadata.melhorEnvio) {
+            const me = method.metadata.melhorEnvio;
+            return `${me.carrierName} - ${me.serviceName}`;
+        }
+        return method.name.replace('Melhor Envio - ', '');
+    }
+
+    getShippingIcon(method: any): string {
+        if (method.metadata && method.metadata.melhorEnvio && method.metadata.melhorEnvio.carrierLogoUrl) {
+            return method.metadata.melhorEnvio.carrierLogoUrl;
+        }
+        return '';
     }
 
     proceedToPayment() {
