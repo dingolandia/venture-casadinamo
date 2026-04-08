@@ -2,45 +2,80 @@
     {{ paymentErrorMessage }}
 </div>
 <ng-container *ngFor="let paymentMethod of paymentMethods$ | async">
-    <h4 class="font-medium">Pagar com método "{{ paymentMethod.code }}"</h4>
-    <div class="alert alert-info my-4" role="alert">
-        Este é um formulário de pagamento de exemplo. Não use dados reais de cartão!
+    <div class="mb-4">
+        <h4 class="font-medium mb-2">Forma de pagamento</h4>
+        <div class="flex items-center space-x-4">
+            <label class="inline-flex items-center">
+                <input type="radio" class="form-radio text-primary-600" name="paymentType" value="credit_card" [(ngModel)]="paymentType">
+                <span class="ml-2">Cartão de Crédito</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="radio" class="form-radio text-primary-600" name="paymentType" value="boleto" [(ngModel)]="paymentType">
+                <span class="ml-2">Boleto</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="radio" class="form-radio text-primary-600" name="paymentType" value="pix" [(ngModel)]="paymentType">
+                <span class="ml-2">Pix</span>
+            </label>
+        </div>
     </div>
-    <form class="border bg-white rounded p-4 max-w-sm" #paymentForm="ngForm" (submit)="completeOrder(paymentMethod.code)">
-        <div class="flex items-center space-x-2">
-            <div class="w-16 text-gray-600">
-                <fa-icon icon="credit-card"></fa-icon>
-            </div>
-            <input type="text"
-                   class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                   name="cardNumber"
-                   [required]="true"
-                   [(ngModel)]="cardNumber"
-                   placeholder="Número do cartão de crédito">
-        </div>
 
-        <div class="flex items-center mt-4 space-x-2">
-            <label class="w-16 text-gray-600" for="month">Validade</label>
-            <select
-                class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                id="month" name="expMonth" [(ngModel)]="expMonth" [required]="true">
-                <option selected [ngValue]="undefined">Mês</option>
-                <option *ngFor="let month of getMonths()" [ngValue]="month">
-                    {{ month }}
-                </option>
-            </select>
-            <select
-                class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                id="year" name="expYear" [(ngModel)]="expYear" [required]="true">
-                <option selected [ngValue]="undefined">Ano</option>
-                <option *ngFor="let year of getYears()" [ngValue]="year">
-                    {{ year }}
-                </option>
-            </select>
+    <div class="mb-6 text-sm">
+        <span class="text-gray-600">Total do pedido: </span>
+        <span class="font-bold">{{ orderTotal | formatPrice }}</span>
+    </div>
 
-        </div>
-        <button class="btn-primary w-full mt-6"
-                [disabled]="paymentForm.pristine || paymentForm.invalid">Finalizar pedido
+    <div *ngIf="paymentType === 'pix'">
+        <button class="btn-primary mb-4" (click)="generatePix()">
+            Gerar QR Code Pix
         </button>
-    </form>
+        <div *ngIf="qrCodeUrl" class="mt-4">
+            <img [src]="qrCodeUrl" alt="QR Code Pix" class="max-w-xs border p-2 bg-white rounded shadow-sm">
+        </div>
+        <button class="btn-secondary w-full max-w-xs mt-6" *ngIf="qrCodeUrl" (click)="completeOrder(paymentMethod.code)">
+            Confirmar Pagamento
+        </button>
+    </div>
+
+    <div *ngIf="paymentType === 'credit_card' || paymentType === 'boleto'">
+        <form class="border bg-white rounded p-4 max-w-sm" #paymentForm="ngForm" (submit)="completeOrder(paymentMethod.code)">
+            <div *ngIf="paymentType === 'credit_card'">
+                <div class="flex items-center space-x-2">
+                    <div class="w-16 text-gray-600">
+                        <fa-icon icon="credit-card"></fa-icon>
+                    </div>
+                    <input type="text"
+                        class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        name="cardNumber"
+                        [required]="true"
+                        [(ngModel)]="cardNumber"
+                        placeholder="Número do cartão de crédito">
+                </div>
+
+                <div class="flex items-center mt-4 space-x-2">
+                    <label class="w-16 text-gray-600" for="month">Validade</label>
+                    <select
+                        class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        id="month" name="expMonth" [(ngModel)]="expMonth" [required]="true">
+                        <option selected [ngValue]="undefined">Mês</option>
+                        <option *ngFor="let month of getMonths()" [ngValue]="month">
+                            {{ month }}
+                        </option>
+                    </select>
+                    <select
+                        class="block flex-1 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        id="year" name="expYear" [(ngModel)]="expYear" [required]="true">
+                        <option selected [ngValue]="undefined">Ano</option>
+                        <option *ngFor="let year of getYears()" [ngValue]="year">
+                            {{ year }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-primary w-full mt-6"
+                    [disabled]="paymentType === 'credit_card' && (paymentForm.pristine || paymentForm.invalid)">Finalizar pedido
+            </button>
+        </form>
+    </div>
 </ng-container>

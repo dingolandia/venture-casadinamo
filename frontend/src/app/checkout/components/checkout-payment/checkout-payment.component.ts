@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AddPaymentMutation, AddPaymentMutationVariables, GetEligiblePaymentMethodsQuery } from '../../../common/generated-types';
+import { AddPaymentMutation, AddPaymentMutationVariables, GetEligiblePaymentMethodsQuery, GetOrderShippingDataQuery } from '../../../common/generated-types';
 import { DataService } from '../../../core/providers/data/data.service';
 import { StateService } from '../../../core/providers/state/state.service';
+import { GET_ORDER_SHIPPING_DATA } from '../checkout-shipping/checkout-shipping.graphql';
 
 import { ADD_PAYMENT, GET_ELIGIBLE_PAYMENT_METHODS } from './checkout-payment.graphql';
 
@@ -19,17 +20,27 @@ export class CheckoutPaymentComponent implements OnInit {
     cardNumber: string;
     expMonth: number;
     expYear: number;
-    paymentMethods$: Observable<GetEligiblePaymentMethodsQuery['eligiblePaymentMethods']>
+    paymentMethods$: Observable<GetEligiblePaymentMethodsQuery['eligiblePaymentMethods']>;
     paymentErrorMessage: string | undefined;
+
+    paymentType: 'credit_card' | 'boleto' | 'pix' = 'pix';
+    qrCodeUrl: string | null = null;
+    orderTotal: number = 0;
 
     constructor(private dataService: DataService,
                 private stateService: StateService,
                 private router: Router,
-                private route: ActivatedRoute) { }
+                private route: ActivatedRoute,
+                private changeDetector: ChangeDetectorRef) { }
 
     ngOnInit() {
         this.paymentMethods$ = this.dataService.query<GetEligiblePaymentMethodsQuery>(GET_ELIGIBLE_PAYMENT_METHODS)
             .pipe(map(res => res.eligiblePaymentMethods));
+
+        this.dataService.query<GetOrderShippingDataQuery>(GET_ORDER_SHIPPING_DATA).subscribe(res => {
+            this.orderTotal = res.activeOrder?.totalWithTax || 0;
+            this.changeDetector.markForCheck();
+        });
     }
 
     getMonths(): number[] {
@@ -41,11 +52,18 @@ export class CheckoutPaymentComponent implements OnInit {
         return Array.from({ length: 10 }).map((_, i) => year + i);
     }
 
+    generatePix() {
+        // Simulando a geração do QR Code via PagSeguro
+        this.qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=00020101021126360014br.gov.bcb.pix0114+5511Casadinamo5204000053039865802BR5913Casadinamo6009Sao%20Paulo62070503***6304D1B91A';
+    }
+
     completeOrder(paymentMethodCode: string) {
         this.dataService.mutate<AddPaymentMutation, AddPaymentMutationVariables>(ADD_PAYMENT, {
             input: {
                 method: paymentMethodCode,
-                metadata: {},
+                metadata: {
+                    paymentType: this.paymentType
+                },
             },
         })
             .subscribe(async ({ addPaymentToOrder }) => {
