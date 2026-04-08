@@ -147,3 +147,6 @@ backend/__admin-ui/tmp/
 
 # SQLite backups / artifacts
 backend/vendure.sqlite*
+
+# Local backups
+bk-vendure/
