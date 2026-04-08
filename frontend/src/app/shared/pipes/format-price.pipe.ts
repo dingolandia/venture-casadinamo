@@ -38,7 +38,8 @@ export class FormatPricePipe implements PipeTransform {
     private formatCurrency(value: number) {
         this.getActiveChannel()
             .then(channel => {
-                const formatter = Intl.NumberFormat(channel.defaultLanguageCode, {
+                const langCode = channel.defaultLanguageCode ? channel.defaultLanguageCode.replace('_', '-') : 'en';
+                const formatter = Intl.NumberFormat(langCode, {
                     style: 'currency',
                     currency: channel.currencyCode,
                 });
