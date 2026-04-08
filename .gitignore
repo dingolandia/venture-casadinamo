@@ -150,3 +150,6 @@ backend/vendure.sqlite*
 
 # Local backups
 bk-vendure/
+
+# Local debug logs (Melhor Envio)
+backend/log-melhorenvio/
