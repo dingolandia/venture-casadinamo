@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AddPaymentMutation, AddPaymentMutationVariables, GetEligiblePaymentMethodsQuery, GetOrderShippingDataQuery } from '../../../common/generated-types';
+import { AddPaymentMutation, AddPaymentMutationVariables, GetEligiblePaymentMethodsQuery, GetCartTotalsQuery } from '../../../common/generated-types';
 import { DataService } from '../../../core/providers/data/data.service';
 import { StateService } from '../../../core/providers/state/state.service';
-import { GET_ORDER_SHIPPING_DATA } from '../checkout-shipping/checkout-shipping.graphql';
+import { GET_CART_TOTALS } from '../../../core/components/cart-toggle/cart-toggle.graphql';
 
 import { ADD_PAYMENT, GET_ELIGIBLE_PAYMENT_METHODS } from './checkout-payment.graphql';
 
@@ -37,7 +37,7 @@ export class CheckoutPaymentComponent implements OnInit {
         this.paymentMethods$ = this.dataService.query<GetEligiblePaymentMethodsQuery>(GET_ELIGIBLE_PAYMENT_METHODS)
             .pipe(map(res => res.eligiblePaymentMethods));
 
-        this.dataService.query<GetOrderShippingDataQuery>(GET_ORDER_SHIPPING_DATA).subscribe(res => {
+        this.dataService.query<GetCartTotalsQuery>(GET_CART_TOTALS).subscribe(res => {
             this.orderTotal = res.activeOrder?.totalWithTax || 0;
             this.changeDetector.markForCheck();
         });
