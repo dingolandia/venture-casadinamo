@@ -1,0 +1,81 @@
+name: Deploy Backend (cPanel)
+
+on:
+  push:
+    branches: ["master", "main"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SSH_OPTS: >-
+        -p ${{ secrets.CPANEL_SSH_PORT }}
+        -o BatchMode=yes
+        -o IdentitiesOnly=yes
+        -o StrictHostKeyChecking=accept-new
+        -o MACs=hmac-sha2-256
+        -o Ciphers=aes256-ctr
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+      - run: npm run build
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
+
+      - name: Add known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.CPANEL_SSH_PORT }}" "${{ secrets.CPANEL_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to API app
+        run: |
+          rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+            -e "ssh $SSH_OPTS" \
+            --exclude "vendure.sqlite" \
+            --exclude "static/assets/**" \
+            --exclude "static/email/test-emails/**" \
+            dist package.json static \
+            "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_API }}/"
+
+      - name: Install deps + restart API
+        run: |
+          ssh $SSH_OPTS "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
+          "cd '${{ secrets.DEPLOY_PATH_API }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
+
+      - name: Deploy to Worker app
+        run: |
+          rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+            -e "ssh $SSH_OPTS" \
+            --exclude "vendure.sqlite" \
+            --exclude "static/assets/**" \
+            --exclude "static/email/test-emails/**" \
+            dist package.json static \
+            "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_WORKER }}/"
+
+      - name: Install deps + restart Worker
+        run: |
+          ssh $SSH_OPTS "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
+          "cd '${{ secrets.DEPLOY_PATH_WORKER }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"

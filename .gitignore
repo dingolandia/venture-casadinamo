@@ -133,3 +133,23 @@ temp/
 *.bak
 *.backup
 *.old
+
+# SSH keys (local only)
+ssh/
+
+# Vendure runtime outputs (local/production runtime dirs)
+backend/static/assets/
+backend/static/email/test-emails/
+
+# Vendure Admin UI local caches (keep sources, ignore caches)
+backend/__admin-ui/.angular/
+backend/__admin-ui/tmp/
+
+# SQLite backups / artifacts
+backend/vendure.sqlite*
+
+# Local backups
+bk-vendure/
+
+# Local debug logs (Melhor Envio)
+backend/log-melhorenvio/
