@@ -57,7 +57,7 @@ jobs:
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
-            dist package.json static \
+            dist __admin-ui package.json patch-vendure-ui.js static \
             "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_API }}/"
 
       - name: Install deps + restart API
@@ -72,7 +72,7 @@ jobs:
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
-            dist package.json static \
+            dist __admin-ui package.json patch-vendure-ui.js static \
             "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_WORKER }}/"
 
       - name: Install deps + restart Worker
