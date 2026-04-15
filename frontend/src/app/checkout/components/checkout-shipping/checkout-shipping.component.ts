@@ -34,6 +34,7 @@ import {
     SET_CUSTOMER_FOR_ORDER,
     SET_SHIPPING_ADDRESS,
     SET_SHIPPING_METHOD,
+    SET_ORDER_CUSTOM_FIELDS,
     TRANSITION_TO_ARRANGING_PAYMENT,
 } from './checkout-shipping.graphql';
 
@@ -161,6 +162,23 @@ export class CheckoutShippingComponent implements OnInit, OnDestroy {
 
     setShippingMethod(id: string) {
         this.shippingMethodId = id;
+        
+        this.eligibleShippingMethods$.pipe(take(1)).subscribe(methods => {
+            const selected = methods?.find(m => m.id === id);
+            if (selected && selected.metadata && selected.metadata.melhorEnvio) {
+                const me = selected.metadata.melhorEnvio;
+                this.dataService.mutate<any, any>(SET_ORDER_CUSTOM_FIELDS, {
+                    input: {
+                        customFields: {
+                            selectedCarrier: me.carrierName,
+                            selectedServiceCode: me.serviceName,
+                            selectedShippingPrice: selected.priceWithTax
+                        }
+                    }
+                }).subscribe();
+            }
+        });
+
         this.stateService.select(state => state.signedIn).pipe(
             take(1),
             mergeMap(signedIn => !signedIn ? this.setCustomerForOrder() || of({}) : of({})),

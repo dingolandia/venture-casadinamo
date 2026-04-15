@@ -62,6 +62,17 @@ export const SET_SHIPPING_METHOD = gql`
     ${ERROR_RESULT_FRAGMENT}
 `;
 
+export const SET_ORDER_CUSTOM_FIELDS = gql`
+    mutation SetOrderCustomFields($input: UpdateOrderInput!) {
+        setOrderCustomFields(input: $input) {
+            ...Cart
+            ...ErrorResult
+        }
+    }
+    ${CART_FRAGMENT}
+    ${ERROR_RESULT_FRAGMENT}
+`;
+
 export const SET_CUSTOMER_FOR_ORDER = gql`
     mutation SetCustomerForOrder($input: CreateCustomerInput!) {
         setCustomerForOrder(input: $input) {
