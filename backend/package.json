@@ -10,7 +10,7 @@
     "start:server": "node ./dist/index.js",
     "start:worker": "node ./dist/index-worker.js",
     "start": "concurrently npm:start:*",
-    "postinstall": "node ./patch-vendure-ui.js"
+    "postinstall": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const base=process.env.INIT_CWD||process.cwd();const script=path.join(base,'patch-vendure-ui.js');if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script],{stdio:'inherit'});process.exit(result.status ?? 0);}console.log('patch-vendure-ui.js not found, skipping.');\""
   },
   "dependencies": {
     "@vendure/admin-ui-plugin": "3.5.5",
