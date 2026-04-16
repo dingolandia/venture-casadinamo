@@ -11,12 +11,32 @@ const admin_ui_plugin_1 = require("@vendure/admin-ui-plugin");
 const graphiql_plugin_1 = require("@vendure/graphiql-plugin");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const debugLogPath = path_1.default.join(__dirname, "../../tmp/bootstrap-config.log");
+function appendConfigDebug(message, details) {
+    try {
+        fs_1.default.mkdirSync(path_1.default.dirname(debugLogPath), { recursive: true });
+        const suffix = details ? ` ${typeof details === 'string' ? details : JSON.stringify(details)}` : '';
+        fs_1.default.appendFileSync(debugLogPath, `[${new Date().toISOString()}] ${message}${suffix}\n`);
+    }
+    catch (_a) { }
+}
 const dotenvPathCandidates = [
     path_1.default.join(__dirname, "../.env"),
     path_1.default.join(__dirname, "../../.env"),
 ];
 const dotenvPath = dotenvPathCandidates.find(candidate => fs_1.default.existsSync(candidate));
 require("dotenv").config(dotenvPath ? { path: dotenvPath } : undefined);
+appendConfigDebug('dotenv resolved', {
+    dotenvPath: dotenvPath !== null && dotenvPath !== void 0 ? dotenvPath : null,
+    cwd: process.cwd(),
+    dirname: __dirname,
+    port: process.env.PORT || null,
+    appEnv: process.env.APP_ENV || null,
+    dbType: process.env.DB_TYPE || null,
+    dbHost: process.env.DB_HOST || null,
+    dbName: process.env.DB_NAME || null,
+    dbUsername: process.env.DB_USERNAME || null,
+});
 const pagseguro_payment_plugin_1 = require("./plugins/pagseguro-payment-plugin");
 const pagseguro_webhook_plugin_1 = require("./plugins/pagseguro-webhook-plugin");
 const pagseguro_api_plugin_1 = require("./plugins/pagseguro-api-plugin");
