@@ -49,9 +49,33 @@ const serverPort = +process.env.PORT || 3000;
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
 const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;
+function resolveRuntimePath(candidates) {
+    const resolved = candidates.find(candidate => fs_1.default.existsSync(candidate));
+    return resolved !== null && resolved !== void 0 ? resolved : candidates[candidates.length - 1];
+}
+const staticAssetsDir = resolveRuntimePath([
+    path_1.default.join(__dirname, '../static/assets'),
+    path_1.default.join(__dirname, '../../static/assets'),
+]);
+const emailOutputDir = resolveRuntimePath([
+    path_1.default.join(__dirname, '../static/email/test-emails'),
+    path_1.default.join(__dirname, '../../static/email/test-emails'),
+]);
+const emailTemplatesDir = resolveRuntimePath([
+    path_1.default.join(__dirname, '../static/email/templates'),
+    path_1.default.join(__dirname, '../../static/email/templates'),
+]);
+const sqliteDbPath = resolveRuntimePath([
+    path_1.default.join(__dirname, '../vendure.sqlite'),
+    path_1.default.join(__dirname, '../../vendure.sqlite'),
+]);
 appendConfigDebug('database flags', {
     isPostgres,
     shouldSynchronize,
+    staticAssetsDir,
+    emailOutputDir,
+    emailTemplatesDir,
+    sqliteDbPath,
 });
 const dbConnectionOptions = isPostgres
     ? {
@@ -71,7 +95,7 @@ const dbConnectionOptions = isPostgres
         synchronize: false,
         migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
         logging: false,
-        database: path_1.default.join(__dirname, '../vendure.sqlite'),
+        database: sqliteDbPath,
     };
 exports.config = {
     apiOptions: {
@@ -180,7 +204,7 @@ exports.config = {
         graphiql_plugin_1.GraphiqlPlugin.init(),
         asset_server_plugin_1.AssetServerPlugin.init({
             route: 'assets',
-            assetUploadDir: path_1.default.join(__dirname, '../static/assets'),
+            assetUploadDir: staticAssetsDir,
             assetUrlPrefix: IS_DEV ? undefined : 'https://www.my-shop.com/assets/',
             previewStrategy: new image_watermark_plugin_1.WatermarkPreviewStrategy(),
         }),
@@ -190,10 +214,10 @@ exports.config = {
         core_1.DefaultSearchPlugin.init({ bufferUpdates: false, indexStockStatus: true }),
         email_plugin_1.EmailPlugin.init({
             devMode: true,
-            outputPath: path_1.default.join(__dirname, '../static/email/test-emails'),
+            outputPath: emailOutputDir,
             route: 'mailbox',
             handlers: email_plugin_1.defaultEmailHandlers,
-            templateLoader: new email_plugin_1.FileBasedTemplateLoader(path_1.default.join(__dirname, '../static/email/templates')),
+            templateLoader: new email_plugin_1.FileBasedTemplateLoader(emailTemplatesDir),
             globalTemplateVars: {
                 fromAddress: '"example" <noreply@example.com>',
                 verifyEmailAddressUrl: 'http://localhost:8080/verify',
