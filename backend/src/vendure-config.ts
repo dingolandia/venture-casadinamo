@@ -78,7 +78,9 @@ if (configFromBackup.plugins) {
                 route: withBasePath('admin'),
                 port: serverPort + 2,
                 adminUiConfig: {
-                    apiPort: serverPort,
+                    apiHost: 'auto',
+                    apiPort: 'auto',
+                    adminApiPath: withBasePath('admin-api'),
                     brand: 'Casa Dinamo',
                     hideVendureBranding: false,
                     hideVersion: true,
