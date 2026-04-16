@@ -46,9 +46,11 @@ const melhor_envio_provision_plugin_1 = require("./plugins/melhor-envio/melhor-e
 const toggleable_shipping_eligibility_checker_1 = require("./plugins/shipping-toggle/toggleable-shipping-eligibility-checker");
 const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
+const appBasePath = (process.env.APP_BASE_PATH || (IS_DEV ? '' : 'api')).replace(/^\/+|\/+$/g, '');
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
 const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;
+const withBasePath = (route) => appBasePath ? `${appBasePath}/${route}` : route;
 function resolveRuntimePath(candidates) {
     const resolved = candidates.find(candidate => fs_1.default.existsSync(candidate));
     return resolved !== null && resolved !== void 0 ? resolved : candidates[candidates.length - 1];
@@ -76,6 +78,7 @@ const sqliteDbPath = resolveRuntimePath([
     path_1.default.join(__dirname, '../../vendure.sqlite'),
 ]);
 appendConfigDebug('database flags', {
+    appBasePath,
     isPostgres,
     shouldSynchronize,
     staticAssetsDir,
@@ -107,8 +110,8 @@ const dbConnectionOptions = isPostgres
 exports.config = {
     apiOptions: {
         port: serverPort,
-        adminApiPath: 'admin-api',
-        shopApiPath: 'shop-api',
+        adminApiPath: withBasePath('admin-api'),
+        shopApiPath: withBasePath('shop-api'),
         trustProxy: IS_DEV ? false : 1,
         ...(IS_DEV ? {
             adminApiDebug: true,
@@ -210,7 +213,7 @@ exports.config = {
     plugins: [
         graphiql_plugin_1.GraphiqlPlugin.init(),
         asset_server_plugin_1.AssetServerPlugin.init({
-            route: 'assets',
+            route: withBasePath('assets'),
             assetUploadDir: staticAssetsDir,
             assetUrlPrefix: IS_DEV ? undefined : 'https://www.my-shop.com/assets/',
             previewStrategy: new image_watermark_plugin_1.WatermarkPreviewStrategy(),
@@ -222,7 +225,7 @@ exports.config = {
         email_plugin_1.EmailPlugin.init({
             devMode: true,
             outputPath: emailOutputDir,
-            route: 'mailbox',
+            route: withBasePath('mailbox'),
             handlers: email_plugin_1.defaultEmailHandlers,
             templateLoader: new email_plugin_1.FileBasedTemplateLoader(emailTemplatesDir),
             globalTemplateVars: {
@@ -233,7 +236,7 @@ exports.config = {
             },
         }),
         admin_ui_plugin_1.AdminUiPlugin.init({
-            route: 'admin',
+            route: withBasePath('admin'),
             port: serverPort + 2,
             adminUiConfig: {
                 apiPort: serverPort,

@@ -13,6 +13,11 @@ const ADMIN_UI_OUTPUT_CANDIDATES = [
 ];
 
 const serverPort = +(process.env.PORT || 3000);
+const appBasePath = (process.env.APP_BASE_PATH || (process.env.APP_ENV === 'dev' ? '' : 'api')).replace(
+    /^\/+|\/+$/g,
+    '',
+);
+const withBasePath = (route: string) => (appBasePath ? `${appBasePath}/${route}` : route);
 
 function resolveCompiledAdminUiPath(): string | undefined {
     return ADMIN_UI_OUTPUT_CANDIDATES.find(candidate =>
@@ -69,7 +74,7 @@ if (configFromBackup.plugins) {
             const adminUiApp = getAdminUiApp();
 
             configFromBackup.plugins[i] = AdminUiPlugin.init({
-                route: 'admin',
+                route: withBasePath('admin'),
                 port: serverPort + 2,
                 adminUiConfig: {
                     apiPort: serverPort,
