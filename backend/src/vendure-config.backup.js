@@ -65,6 +65,12 @@ const emailTemplatesDir = resolveRuntimePath([
     path_1.default.join(__dirname, '../static/email/templates'),
     path_1.default.join(__dirname, '../../static/email/templates'),
 ]);
+const adminUiAppPath = resolveRuntimePath([
+    path_1.default.join(__dirname, '../__admin-ui/dist/browser'),
+    path_1.default.join(__dirname, '../../__admin-ui/dist/browser'),
+    path_1.default.join(__dirname, '../__admin-ui/dist'),
+    path_1.default.join(__dirname, '../../__admin-ui/dist'),
+]);
 const sqliteDbPath = resolveRuntimePath([
     path_1.default.join(__dirname, '../vendure.sqlite'),
     path_1.default.join(__dirname, '../../vendure.sqlite'),
@@ -75,6 +81,7 @@ appendConfigDebug('database flags', {
     staticAssetsDir,
     emailOutputDir,
     emailTemplatesDir,
+    adminUiAppPath,
     sqliteDbPath,
 });
 const dbConnectionOptions = isPostgres
@@ -230,7 +237,12 @@ exports.config = {
             port: serverPort + 2,
             adminUiConfig: {
                 apiPort: serverPort,
+                brand: 'Casa Dinamo',
+                hideVendureBranding: false,
+                hideVersion: true,
+                defaultLanguage: core_1.LanguageCode.pt_BR,
             },
+            app: { path: adminUiAppPath },
         }),
         pagseguro_webhook_plugin_1.PagSeguroWebhookPlugin.init({
             webhookPath: '/api/pagseguro/webhook'
