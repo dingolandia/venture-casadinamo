@@ -16,7 +16,6 @@ jobs:
       run:
         working-directory: backend
     env:
-      SSH_KEY_FILE: ~/.ssh/deploy_backend
       SSH_OPTS: >-
         -p ${{ secrets.CPANEL_SSH_PORT }}
         -o BatchMode=yes
@@ -42,6 +41,7 @@ jobs:
 
       - name: Setup SSH
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > "$SSH_KEY_FILE"
           chmod 600 "$SSH_KEY_FILE"
@@ -49,10 +49,12 @@ jobs:
 
       - name: Test SSH connection
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" "echo 'SSH OK'"
 
       - name: Deploy to API app
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
             -e "ssh $SSH_OPTS -i $SSH_KEY_FILE" \
             --exclude "vendure.sqlite" \
@@ -63,11 +65,13 @@ jobs:
 
       - name: Install deps + restart API
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
           "cd '${{ secrets.DEPLOY_PATH_API }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Deploy to Worker app
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
             -e "ssh $SSH_OPTS -i $SSH_KEY_FILE" \
             --exclude "vendure.sqlite" \
@@ -78,5 +82,6 @@ jobs:
 
       - name: Install deps + restart Worker
         run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
           "cd '${{ secrets.DEPLOY_PATH_WORKER }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
