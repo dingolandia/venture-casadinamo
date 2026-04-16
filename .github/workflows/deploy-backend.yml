@@ -60,14 +60,14 @@ jobs:
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
-            dist __admin-ui package.json patch-vendure-ui.js static \
+            dist __admin-ui package.json package-lock.json patch-vendure-ui.js static \
             "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_API }}/"
 
       - name: Install deps + restart API
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_API }}' && node -v && npm -v && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
+          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_API }}' && node -v && npm -v && if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Deploy to Worker app
         run: |
@@ -77,11 +77,11 @@ jobs:
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
-            dist __admin-ui package.json patch-vendure-ui.js static \
+            dist __admin-ui package.json package-lock.json patch-vendure-ui.js static \
             "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_WORKER }}/"
 
       - name: Install deps + restart Worker
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend-worker/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_WORKER }}' && node -v && npm -v && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
+          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend-worker/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_WORKER }}' && node -v && npm -v && if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
