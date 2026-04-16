@@ -20,6 +20,28 @@ const melhor_envio_provision_plugin_1 = require("./plugins/melhor-envio/melhor-e
 const toggleable_shipping_eligibility_checker_1 = require("./plugins/shipping-toggle/toggleable-shipping-eligibility-checker");
 const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
+const dbType = process.env.DB_TYPE || 'better-sqlite3';
+const isPostgres = dbType === 'postgres';
+const dbConnectionOptions = isPostgres
+    ? {
+        type: 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: +(process.env.DB_PORT || 5432),
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        synchronize: false,
+        migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
+        logging: false,
+        ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    }
+    : {
+        type: 'better-sqlite3',
+        synchronize: false,
+        migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
+        logging: false,
+        database: path_1.default.join(__dirname, '../vendure.sqlite'),
+    };
 exports.config = {
     apiOptions: {
         port: serverPort,
@@ -41,13 +63,7 @@ exports.config = {
             secret: process.env.COOKIE_SECRET,
         },
     },
-    dbConnectionOptions: {
-        type: 'better-sqlite3',
-        synchronize: false,
-        migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
-        logging: false,
-        database: path_1.default.join(__dirname, '../vendure.sqlite'),
-    },
+    dbConnectionOptions,
     paymentOptions: {
         paymentMethodHandlers: [
             core_1.dummyPaymentHandler,

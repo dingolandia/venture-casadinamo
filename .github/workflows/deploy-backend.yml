@@ -67,7 +67,7 @@ jobs:
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "cd '${{ secrets.DEPLOY_PATH_API }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
+          "cd '${{ secrets.DEPLOY_PATH_API }}' && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Deploy to Worker app
         run: |
@@ -84,4 +84,4 @@ jobs:
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
           ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "cd '${{ secrets.DEPLOY_PATH_WORKER }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
+          "cd '${{ secrets.DEPLOY_PATH_WORKER }}' && if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional --no-audit --no-fund; else npm install --omit=dev --omit=optional --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
