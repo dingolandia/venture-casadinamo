@@ -48,6 +48,11 @@ const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
+const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;
+appendConfigDebug('database flags', {
+    isPostgres,
+    shouldSynchronize,
+});
 const dbConnectionOptions = isPostgres
     ? {
         type: 'postgres',
@@ -56,7 +61,7 @@ const dbConnectionOptions = isPostgres
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
-        synchronize: false,
+        synchronize: shouldSynchronize,
         migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
         logging: false,
         ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
