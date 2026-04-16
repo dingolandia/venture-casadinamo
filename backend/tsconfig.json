@@ -24,6 +24,7 @@
     "src/plugins/**/ui/*",
     "src/plugins/**/dashboard/*",
     "admin-ui",
+    "__admin-ui",
     "vite.*.*ts"
   ],
   "ts-node": {
