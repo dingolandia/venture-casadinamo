@@ -8,6 +8,8 @@ import { config as configFromBackup } from './vendure-config.backup.js';
 const ADMIN_UI_OUTPUT_CANDIDATES = [
     path.join(__dirname, '../__admin-ui/dist/browser'),
     path.join(__dirname, '../__admin-ui/dist'),
+    path.join(__dirname, '../../__admin-ui/dist/browser'),
+    path.join(__dirname, '../../__admin-ui/dist'),
 ];
 
 const serverPort = +(process.env.PORT || 3000);

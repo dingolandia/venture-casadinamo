@@ -9,8 +9,14 @@ const email_plugin_1 = require("@vendure/email-plugin");
 const asset_server_plugin_1 = require("@vendure/asset-server-plugin");
 const admin_ui_plugin_1 = require("@vendure/admin-ui-plugin");
 const graphiql_plugin_1 = require("@vendure/graphiql-plugin");
+const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-require("dotenv").config({ path: path_1.default.join(__dirname, "../.env") });
+const dotenvPathCandidates = [
+    path_1.default.join(__dirname, "../.env"),
+    path_1.default.join(__dirname, "../../.env"),
+];
+const dotenvPath = dotenvPathCandidates.find(candidate => fs_1.default.existsSync(candidate));
+require("dotenv").config(dotenvPath ? { path: dotenvPath } : undefined);
 const pagseguro_payment_plugin_1 = require("./plugins/pagseguro-payment-plugin");
 const pagseguro_webhook_plugin_1 = require("./plugins/pagseguro-webhook-plugin");
 const pagseguro_api_plugin_1 = require("./plugins/pagseguro-api-plugin");
