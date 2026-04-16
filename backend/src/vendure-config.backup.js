@@ -46,7 +46,8 @@ const melhor_envio_provision_plugin_1 = require("./plugins/melhor-envio/melhor-e
 const toggleable_shipping_eligibility_checker_1 = require("./plugins/shipping-toggle/toggleable-shipping-eligibility-checker");
 const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
-const appBasePath = (process.env.APP_BASE_PATH || (IS_DEV ? '' : 'api')).replace(/^\/+|\/+$/g, '');
+const isCompiledRuntime = __dirname.includes(`${path_1.default.sep}dist${path_1.default.sep}`);
+const appBasePath = (process.env.APP_BASE_PATH || (isCompiledRuntime ? 'api' : '')).replace(/^\/+|\/+$/g, '');
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
 const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;

@@ -13,7 +13,8 @@ const ADMIN_UI_OUTPUT_CANDIDATES = [
 ];
 
 const serverPort = +(process.env.PORT || 3000);
-const appBasePath = (process.env.APP_BASE_PATH || (process.env.APP_ENV === 'dev' ? '' : 'api')).replace(
+const isCompiledRuntime = __dirname.includes(`${path.sep}dist${path.sep}`);
+const appBasePath = (process.env.APP_BASE_PATH || (isCompiledRuntime ? 'api' : '')).replace(
     /^\/+|\/+$/g,
     '',
 );
