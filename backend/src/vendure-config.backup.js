@@ -53,11 +53,12 @@ const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
 const isCompiledRuntime = __dirname.includes(`${path_1.default.sep}dist${path_1.default.sep}`);
 const appBasePath = (process.env.APP_BASE_PATH || (isCompiledRuntime ? 'api' : '')).replace(/^\/+|\/+$/g, '');
-const adminUiApiHost = appBasePath ? `/${appBasePath}` : 'auto';
+const withBasePath = (route) => appBasePath ? `${appBasePath}/${route}` : route;
+const adminUiApiHost = 'auto';
+const adminUiAdminApiPath = withBasePath('admin-api');
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
 const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;
-const withBasePath = (route) => appBasePath ? `${appBasePath}/${route}` : route;
 function resolveRuntimePath(candidates) {
     const resolved = candidates.find(candidate => fs_1.default.existsSync(candidate));
     return resolved !== null && resolved !== void 0 ? resolved : candidates[candidates.length - 1];
@@ -87,6 +88,7 @@ const sqliteDbPath = resolveRuntimePath([
 appendConfigDebug('database flags', {
     appBasePath,
     adminUiApiHost,
+    adminUiAdminApiPath,
     isPostgres,
     shouldSynchronize,
     staticAssetsDir,
@@ -255,7 +257,7 @@ exports.config = {
             adminUiConfig: {
                 apiHost: adminUiApiHost,
                 apiPort: 'auto',
-                adminApiPath: 'admin-api',
+                adminApiPath: adminUiAdminApiPath,
                 brand: 'Casa Dinamo',
                 hideVendureBranding: false,
                 hideVersion: true,
