@@ -11,6 +11,7 @@ const admin_ui_plugin_1 = require("@vendure/admin-ui-plugin");
 const graphiql_plugin_1 = require("@vendure/graphiql-plugin");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const configBuildMarker = 'deploy-marker-2026-04-16-1410';
 const debugLogPath = path_1.default.join(__dirname, "../../tmp/bootstrap-config.log");
 function appendConfigDebug(message, details) {
     try {
@@ -27,6 +28,7 @@ const dotenvPathCandidates = [
 const dotenvPath = dotenvPathCandidates.find(candidate => fs_1.default.existsSync(candidate));
 require("dotenv").config(dotenvPath ? { path: dotenvPath } : undefined);
 appendConfigDebug('dotenv resolved', {
+    configBuildMarker,
     dotenvPath: dotenvPath !== null && dotenvPath !== void 0 ? dotenvPath : null,
     cwd: process.cwd(),
     dirname: __dirname,
