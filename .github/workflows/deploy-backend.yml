@@ -16,6 +16,7 @@ jobs:
       run:
         working-directory: backend
     env:
+      SSH_KEY_FILE: ~/.ssh/deploy_backend
       SSH_OPTS: >-
         -p ${{ secrets.CPANEL_SSH_PORT }}
         -o BatchMode=yes
@@ -39,20 +40,21 @@ jobs:
           fi
       - run: npm run build
 
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
-
-      - name: Add known_hosts
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > "$SSH_KEY_FILE"
+          chmod 600 "$SSH_KEY_FILE"
           ssh-keyscan -p "${{ secrets.CPANEL_SSH_PORT }}" "${{ secrets.CPANEL_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" "echo 'SSH OK'"
 
       - name: Deploy to API app
         run: |
           rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
-            -e "ssh $SSH_OPTS" \
+            -e "ssh $SSH_OPTS -i $SSH_KEY_FILE" \
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
@@ -61,13 +63,13 @@ jobs:
 
       - name: Install deps + restart API
         run: |
-          ssh $SSH_OPTS "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
           "cd '${{ secrets.DEPLOY_PATH_API }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
 
       - name: Deploy to Worker app
         run: |
           rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
-            -e "ssh $SSH_OPTS" \
+            -e "ssh $SSH_OPTS -i $SSH_KEY_FILE" \
             --exclude "vendure.sqlite" \
             --exclude "static/assets/**" \
             --exclude "static/email/test-emails/**" \
@@ -76,5 +78,5 @@ jobs:
 
       - name: Install deps + restart Worker
         run: |
-          ssh $SSH_OPTS "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
           "cd '${{ secrets.DEPLOY_PATH_WORKER }}' && if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && mkdir -p tmp && touch tmp/restart.txt"
