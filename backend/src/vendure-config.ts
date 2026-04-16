@@ -18,6 +18,7 @@ const appBasePath = (process.env.APP_BASE_PATH || (isCompiledRuntime ? 'api' : '
     /^\/+|\/+$/g,
     '',
 );
+const adminUiApiHost = appBasePath ? `/${appBasePath}` : 'auto';
 const withBasePath = (route: string) => (appBasePath ? `${appBasePath}/${route}` : route);
 
 function resolveCompiledAdminUiPath(): string | undefined {
@@ -78,9 +79,9 @@ if (configFromBackup.plugins) {
                 route: withBasePath('admin'),
                 port: serverPort + 2,
                 adminUiConfig: {
-                    apiHost: 'auto',
+                    apiHost: adminUiApiHost,
                     apiPort: 'auto',
-                    adminApiPath: withBasePath('admin-api'),
+                    adminApiPath: 'admin-api',
                     brand: 'Casa Dinamo',
                     hideVendureBranding: false,
                     hideVersion: true,

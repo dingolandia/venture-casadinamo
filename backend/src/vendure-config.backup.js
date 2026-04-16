@@ -50,6 +50,7 @@ const IS_DEV = process.env.APP_ENV === 'dev';
 const serverPort = +process.env.PORT || 3000;
 const isCompiledRuntime = __dirname.includes(`${path_1.default.sep}dist${path_1.default.sep}`);
 const appBasePath = (process.env.APP_BASE_PATH || (isCompiledRuntime ? 'api' : '')).replace(/^\/+|\/+$/g, '');
+const adminUiApiHost = appBasePath ? `/${appBasePath}` : 'auto';
 const dbType = process.env.DB_TYPE || 'better-sqlite3';
 const isPostgres = dbType === 'postgres';
 const shouldSynchronize = isPostgres ? process.env.DB_SYNCHRONIZE !== 'false' : false;
@@ -82,6 +83,7 @@ const sqliteDbPath = resolveRuntimePath([
 ]);
 appendConfigDebug('database flags', {
     appBasePath,
+    adminUiApiHost,
     isPostgres,
     shouldSynchronize,
     staticAssetsDir,
@@ -242,9 +244,9 @@ exports.config = {
             route: withBasePath('admin'),
             port: serverPort + 2,
             adminUiConfig: {
-                apiHost: 'auto',
+                apiHost: adminUiApiHost,
                 apiPort: 'auto',
-                adminApiPath: withBasePath('admin-api'),
+                adminApiPath: 'admin-api',
                 brand: 'Casa Dinamo',
                 hideVendureBranding: false,
                 hideVersion: true,
