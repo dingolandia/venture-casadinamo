@@ -21,6 +21,9 @@ function appendConfigDebug(message, details) {
     }
     catch (_a) { }
 }
+function healthcheckAlias(_req, res) {
+    res.json({ status: 'ok' });
+}
 const dotenvPathCandidates = [
     path_1.default.join(__dirname, "../.env"),
     path_1.default.join(__dirname, "../../.env"),
@@ -117,6 +120,12 @@ exports.config = {
         port: serverPort,
         adminApiPath: withBasePath('admin-api'),
         shopApiPath: withBasePath('shop-api'),
+        middleware: [
+            {
+                route: `/${withBasePath('admin')}/health`,
+                handler: healthcheckAlias,
+            },
+        ],
         trustProxy: IS_DEV ? false : 1,
         ...(IS_DEV ? {
             adminApiDebug: true,
