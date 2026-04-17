@@ -66,8 +66,39 @@ jobs:
       - name: Install deps + restart API
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
-          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_API }}' && node -v && npm -v && if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi && if [ -f package-lock.json ]; then npm ci --omit=dev --no-audit --no-fund; else npm install --omit=dev --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" <<'EOF'
+          source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend/20/bin/activate
+          cd '${{ secrets.DEPLOY_PATH_API }}'
+          node -v
+          npm -v
+          if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi
+          node <<'NODE'
+          const fs = require('fs');
+          for (const file of ['package.json', 'package-lock.json']) {
+            if (!fs.existsSync(file)) continue;
+            const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if (file === 'package.json') {
+              if (json.optionalDependencies) delete json.optionalDependencies['better-sqlite3'];
+              if (json.dependencies) delete json.dependencies['better-sqlite3'];
+            } else {
+              if (json.packages && json.packages['']) {
+                if (json.packages[''].optionalDependencies) {
+                  delete json.packages[''].optionalDependencies['better-sqlite3'];
+                }
+                if (json.packages[''].dependencies) {
+                  delete json.packages[''].dependencies['better-sqlite3'];
+                }
+              }
+              if (json.packages) delete json.packages['node_modules/better-sqlite3'];
+              if (json.dependencies) delete json.dependencies['better-sqlite3'];
+            }
+            fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
+          }
+          NODE
+          if [ -f package-lock.json ]; then npm ci --omit=dev --no-audit --no-fund; else npm install --omit=dev --no-audit --no-fund; fi
+          mkdir -p tmp
+          touch tmp/restart.txt
+          EOF
 
       - name: Deploy to Worker app
         run: |
@@ -83,5 +114,36 @@ jobs:
       - name: Install deps + restart Worker
         run: |
           SSH_KEY_FILE="$HOME/.ssh/deploy_backend"
-          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" \
-          "source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend-worker/20/bin/activate && cd '${{ secrets.DEPLOY_PATH_WORKER }}' && node -v && npm -v && if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi && if [ -f package-lock.json ]; then npm ci --omit=dev --no-audit --no-fund; else npm install --omit=dev --no-audit --no-fund; fi && mkdir -p tmp && touch tmp/restart.txt"
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" <<'EOF'
+          source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/backend-worker/20/bin/activate
+          cd '${{ secrets.DEPLOY_PATH_WORKER }}'
+          node -v
+          npm -v
+          if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi
+          node <<'NODE'
+          const fs = require('fs');
+          for (const file of ['package.json', 'package-lock.json']) {
+            if (!fs.existsSync(file)) continue;
+            const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if (file === 'package.json') {
+              if (json.optionalDependencies) delete json.optionalDependencies['better-sqlite3'];
+              if (json.dependencies) delete json.dependencies['better-sqlite3'];
+            } else {
+              if (json.packages && json.packages['']) {
+                if (json.packages[''].optionalDependencies) {
+                  delete json.packages[''].optionalDependencies['better-sqlite3'];
+                }
+                if (json.packages[''].dependencies) {
+                  delete json.packages[''].dependencies['better-sqlite3'];
+                }
+              }
+              if (json.packages) delete json.packages['node_modules/better-sqlite3'];
+              if (json.dependencies) delete json.dependencies['better-sqlite3'];
+            }
+            fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
+          }
+          NODE
+          if [ -f package-lock.json ]; then npm ci --omit=dev --no-audit --no-fund; else npm install --omit=dev --no-audit --no-fund; fi
+          mkdir -p tmp
+          touch tmp/restart.txt
+          EOF

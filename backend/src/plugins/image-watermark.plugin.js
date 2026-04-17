@@ -14,15 +14,21 @@ const core_1 = require("@vendure/core");
 const fs_1 = __importDefault(require("fs"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
+function resolveWatermarkPath() {
+    const candidates = [
+        path_1.default.join(__dirname, "images", "watermark.png"),
+        path_1.default.resolve(process.cwd(), "src", "plugins", "images", "watermark.png"),
+        path_1.default.resolve(process.cwd(), "dist", "src", "plugins", "images", "watermark.png"),
+    ];
+    return candidates.find(candidate => fs_1.default.existsSync(candidate));
+}
 class WatermarkPreviewStrategy {
     async generatePreviewImage(ctx, mimeType, data) {
         try {
-            // Caminho relativo ao projeto (funciona em dev). Em prod, certifique-se de copiar a imagem.
-            const watermarkPath = path_1.default.resolve(process.cwd(), "src", "plugins", "images", "watermark.png");
-            const exists = fs_1.default.existsSync(watermarkPath);
-            core_1.Logger.info(`WatermarkPreviewStrategy: start; mimeType=${mimeType}; dataSize=${data.length}; watermarkPath=${watermarkPath}; exists=${exists}`);
-            if (!exists) {
-                core_1.Logger.error(`WatermarkPreviewStrategy: watermark not found at ${watermarkPath}`);
+            const watermarkPath = resolveWatermarkPath();
+            core_1.Logger.info(`WatermarkPreviewStrategy: start; mimeType=${mimeType}; dataSize=${data.length}; watermarkPath=${watermarkPath !== null && watermarkPath !== void 0 ? watermarkPath : 'not-found'}`);
+            if (!watermarkPath) {
+                core_1.Logger.error("WatermarkPreviewStrategy: watermark not found in expected paths");
                 return data;
             }
             // Ignora pequenos erros/avisos de JPEG de entrada para não interromper o processamento

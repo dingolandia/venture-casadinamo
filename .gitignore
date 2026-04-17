@@ -126,6 +126,7 @@ temp/
 *.JPG
 *.jpg
 *.png
+!backend/src/plugins/images/watermark.png
 *.gif
 *.bmp
 
