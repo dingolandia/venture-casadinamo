@@ -30,8 +30,14 @@ export class HomePageComponent implements OnInit {
     }
 
     private getHeroImageUrl(): string {
-        const {apiHost, apiPort} = environment;
-        return `${apiHost}:${apiPort}/assets/preview/a2/thomas-serer-420833-unsplash__preview.jpg`;
+        const normalizedHost = environment.apiHost.replace(/\/+$/, '');
+        const normalizedPort = `${environment.apiPort ?? ''}`;
+        const portSegment =
+            normalizedPort === '' || normalizedPort === 'auto'
+                ? ''
+                : `:${normalizedPort}`;
+
+        return `${normalizedHost}${portSegment}/assets/preview/a2/thomas-serer-420833-unsplash__preview.jpg`;
     }
 
 }

@@ -1,0 +1,83 @@
+name: Deploy Frontend (cPanel)
+
+on:
+  push:
+    branches: ["master", "main"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      SSH_OPTS: >-
+        -p ${{ secrets.CPANEL_SSH_PORT }}
+        -o BatchMode=yes
+        -o IdentitiesOnly=yes
+        -o StrictHostKeyChecking=accept-new
+        -o MACs=hmac-sha2-256
+        -o Ciphers=aes256-ctr
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build SSR
+        run: npm run build:ssr
+
+      - name: Setup SSH
+        run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_frontend"
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > "$SSH_KEY_FILE"
+          chmod 600 "$SSH_KEY_FILE"
+          ssh-keyscan -p "${{ secrets.CPANEL_SSH_PORT }}" "${{ secrets.CPANEL_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_frontend"
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" "echo 'SSH OK'"
+
+      - name: Ensure remote frontend path exists
+        run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_frontend"
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" "mkdir -p '${{ secrets.DEPLOY_PATH_FRONTEND }}'"
+
+      - name: Deploy frontend files
+        run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_frontend"
+          rsync -az --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+            -e "ssh $SSH_OPTS -i $SSH_KEY_FILE" \
+            dist package.json package-lock.json index.js \
+            "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.DEPLOY_PATH_FRONTEND }}/"
+
+      - name: Install deps + restart frontend
+        run: |
+          SSH_KEY_FILE="$HOME/.ssh/deploy_frontend"
+          ssh $SSH_OPTS -i "$SSH_KEY_FILE" "${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}" <<'EOF'
+          source /home/${{ secrets.CPANEL_SSH_USER }}/nodevenv/casadinamo.com.br/frontend/20/bin/activate
+          cd '${{ secrets.DEPLOY_PATH_FRONTEND }}'
+          node -v
+          npm -v
+          if [ -d node_modules ] && [ ! -L node_modules ]; then rm -rf node_modules; fi
+          if [ -f package-lock.json ]; then npm ci --omit=dev --no-audit --no-fund; else npm install --omit=dev --no-audit --no-fund; fi
+          mkdir -p tmp
+          touch tmp/restart.txt
+          EOF

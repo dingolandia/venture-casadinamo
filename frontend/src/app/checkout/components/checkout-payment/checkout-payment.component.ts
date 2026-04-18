@@ -21,6 +21,7 @@ export class CheckoutPaymentComponent implements OnInit {
     expMonth: number;
     expYear: number;
     paymentMethods$: Observable<GetEligiblePaymentMethodsQuery['eligiblePaymentMethods']>;
+    selectedPaymentMethodCode: string | undefined;
     paymentErrorMessage: string | undefined;
 
     paymentType: 'credit_card' | 'boleto' | 'pix' = 'pix';
@@ -35,7 +36,14 @@ export class CheckoutPaymentComponent implements OnInit {
 
     ngOnInit() {
         this.paymentMethods$ = this.dataService.query<GetEligiblePaymentMethodsQuery>(GET_ELIGIBLE_PAYMENT_METHODS)
-            .pipe(map(res => res.eligiblePaymentMethods));
+            .pipe(map(res => {
+                const methods = res.eligiblePaymentMethods;
+                this.selectedPaymentMethodCode =
+                    methods.find(method => method.code === 'pagseguro-payment')?.code ??
+                    methods[0]?.code;
+                this.changeDetector.markForCheck();
+                return methods;
+            }));
 
         this.dataService.query<GetCartTotalsQuery>(GET_CART_TOTALS).subscribe(res => {
             this.orderTotal = res.activeOrder?.totalWithTax || 0;
@@ -57,7 +65,12 @@ export class CheckoutPaymentComponent implements OnInit {
         this.qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=00020101021126360014br.gov.bcb.pix0114+5511Casadinamo5204000053039865802BR5913Casadinamo6009Sao%20Paulo62070503***6304D1B91A';
     }
 
-    completeOrder(paymentMethodCode: string) {
+    completeOrder(paymentMethodCode = this.selectedPaymentMethodCode) {
+        if (!paymentMethodCode) {
+            this.paymentErrorMessage = 'Nenhum metodo de pagamento disponivel.';
+            this.changeDetector.markForCheck();
+            return;
+        }
         this.dataService.mutate<AddPaymentMutation, AddPaymentMutationVariables>(ADD_PAYMENT, {
             input: {
                 method: paymentMethodCode,

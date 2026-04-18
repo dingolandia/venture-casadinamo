@@ -29,6 +29,7 @@
     "@angular/platform-server": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@angular/service-worker": "^18.2.0",
+    "@angular/ssr": "^18.2.0",
     "@apollo/client": "^3.11.0",
     "@fortawesome/angular-fontawesome": "^0.15.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",

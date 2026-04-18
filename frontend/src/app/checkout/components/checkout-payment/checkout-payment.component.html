@@ -1,7 +1,11 @@
 <div class="alert alert-danger" role="alert" *ngIf="paymentErrorMessage">
     {{ paymentErrorMessage }}
 </div>
-<ng-container *ngFor="let paymentMethod of paymentMethods$ | async">
+<ng-container *ngIf="paymentMethods$ | async as paymentMethods">
+    <div class="alert alert-warning" role="alert" *ngIf="paymentMethods.length === 0">
+        Nenhum metodo de pagamento disponivel no momento.
+    </div>
+    <ng-container *ngIf="paymentMethods.length > 0">
     <div class="mb-4">
         <h4 class="font-medium mb-2">Forma de pagamento</h4>
         <div class="flex items-center space-x-4">
@@ -32,13 +36,13 @@
         <div *ngIf="qrCodeUrl" class="mt-4">
             <img [src]="qrCodeUrl" alt="QR Code Pix" class="max-w-xs border p-2 bg-white rounded shadow-sm">
         </div>
-        <button class="btn-secondary w-full max-w-xs mt-6" *ngIf="qrCodeUrl" (click)="completeOrder(paymentMethod.code)">
+        <button class="btn-secondary w-full max-w-xs mt-6" *ngIf="qrCodeUrl" (click)="completeOrder()">
             Confirmar Pagamento
         </button>
     </div>
 
     <div *ngIf="paymentType === 'credit_card' || paymentType === 'boleto'">
-        <form class="border bg-white rounded p-4 max-w-sm" #paymentForm="ngForm" (submit)="completeOrder(paymentMethod.code)">
+        <form class="border bg-white rounded p-4 max-w-sm" #paymentForm="ngForm" (submit)="completeOrder()">
             <div *ngIf="paymentType === 'credit_card'">
                 <div class="flex items-center space-x-2">
                     <div class="w-16 text-gray-600">
@@ -78,4 +82,5 @@
             </button>
         </form>
     </div>
+    </ng-container>
 </ng-container>

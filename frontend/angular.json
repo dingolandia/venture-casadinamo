@@ -45,7 +45,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "/",
+              "baseHref": "/store/",
               "budgets": [
                 {
                   "type": "anyComponentStyle",

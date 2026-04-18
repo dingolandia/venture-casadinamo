@@ -8,7 +8,8 @@
             <div class="main">
                 <router-outlet></router-outlet>
             </div>
-            <div class="summary" *ngIf="cart$ | async as cart">
+            <div class="summary" *ngIf="activeStage !== 4">
+                <ng-container *ngIf="cart$ | async as cart">
                 <vsf-cart-contents [cart]="cart" class="mb-3"></vsf-cart-contents>
                 <vsf-cart-totals [cart]="cart"></vsf-cart-totals>
                 <vsf-address-card *ngIf="cart.shippingAddress?.streetLine1"
@@ -20,6 +21,7 @@
                             (click)="changeShippingAddress()">Alterar
                     </button>
                 </vsf-address-card>
+                </ng-container>
             </div>
         </div>
     </div>

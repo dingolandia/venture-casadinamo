@@ -96,8 +96,15 @@ export function apolloOptionsFactory(
         },
     });
 
-    const {apiHost, apiPort, shopApiPath} = environment;
-    const uri = `${apiHost}:${apiPort}/${shopApiPath}`;
+    const { apiHost, apiPort, shopApiPath } = environment;
+    const normalizedHost = apiHost.replace(/\/+$/, '');
+    const normalizedPath = shopApiPath.replace(/^\/+/, '');
+    const normalizedPort = `${apiPort ?? ''}`;
+    const portSegment =
+        normalizedPort === '' || normalizedPort === 'auto'
+            ? ''
+            : `:${normalizedPort}`;
+    const uri = `${normalizedHost}${portSegment}/${normalizedPath}`;
     const options: Options = {
         uri,
         withCredentials: false,

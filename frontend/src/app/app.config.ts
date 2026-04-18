@@ -1,6 +1,6 @@
 export interface ServerConfig {
     apiHost: string;
-    apiPort: number;
+    apiPort: number | 'auto';
     shopApiPath: string;
 }
 declare const global: any;
