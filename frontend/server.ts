@@ -22,10 +22,13 @@ export function app() {
 
     // Example Express Rest API endpoints
     // app.get('/api/**', (req, res) => { });
-    // Serve static files from /browser
-    server.get('*.*', express.static(distFolder, {
+    // Serve static files from /browser for both direct root access and subpath access.
+    const staticHandler = express.static(distFolder, {
+        index: false,
         maxAge: '1y',
-    }));
+    });
+    server.use(staticHandler);
+    server.use('/store', staticHandler);
 
     // All regular routes use the SSR engine
     server.get('*', (req, res, next) => {

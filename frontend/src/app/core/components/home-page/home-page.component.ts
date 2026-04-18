@@ -36,8 +36,10 @@ export class HomePageComponent implements OnInit {
             normalizedPort === '' || normalizedPort === 'auto'
                 ? ''
                 : `:${normalizedPort}`;
+        const assetBasePath = environment.shopApiPath.replace(/\/?shop-api\/?$/, '/assets');
+        const normalizedAssetBasePath = assetBasePath.replace(/^\/+/, '');
 
-        return `${normalizedHost}${portSegment}/assets/preview/a2/thomas-serer-420833-unsplash__preview.jpg`;
+        return `${normalizedHost}${portSegment}/${normalizedAssetBasePath}/preview/a2/thomas-serer-420833-unsplash__preview.jpg`;
     }
 
 }
