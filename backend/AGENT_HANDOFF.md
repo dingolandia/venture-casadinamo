@@ -26,7 +26,7 @@ O backend atende:
 - O bootstrap do backend em producao ja chegou a subir e o Admin UI passou a abrir.
 - O problema restante deixou de ser Passenger/bootstrap puro e passou a ser roteamento/configuracao do Admin UI.
 
-### O que foi corrigido nesta rodada local
+### O que foi corrigido nas rodadas locais mais recentes
 
 - A configuracao do Admin UI agora usa `apiHost: 'auto'`.
 - O `adminApiPath` do Admin UI agora passa a ser `api/admin-api` quando o backend estiver sob `/api`.
@@ -34,6 +34,12 @@ O backend atende:
 - O `base href` servido pelo Admin UI ficou em `/api/admin/`.
 - O erro local `ReferenceError: adminApiPath is not defined` foi corrigido no patch do Vendure.
 - O erro local anterior `ReferenceError: Cannot access 'withBasePath' before initialization` tambem foi corrigido.
+- O SQLite local foi restaurado a partir do backup em `bk-vendure`.
+- O schema antigo do SQLite restaurado foi completado localmente para recriar a tabela `asset_translation` sem apagar os dados existentes.
+- O arquivo original da marca d'agua foi restaurado em `src/plugins/images/watermark.png`.
+- O plugin da marca d'agua passou a localizar o PNG em `src` e em `dist/src`.
+- O build passou a copiar `src/plugins/images` para `dist/src/plugins/images`.
+- O workflow de deploy foi ajustado localmente para remover apenas `better-sqlite3` no remoto antes do `npm ci`, evitando quebrar o cPanel sem reabrir o problema do `sharp`.
 
 ### Status local no momento deste handoff
 
@@ -47,7 +53,18 @@ Validado com o servidor local em `PORT=3050`:
   - `apiHost: "auto"`
   - `apiPort: "auto"`
   - `adminApiPath: "api/admin-api"`
+- `http://localhost:3050/api/admin/catalog/assets` responde `200`.
+- O local voltou a carregar sem o erro `no such table: asset_translation`.
+- O `shop-api` local voltou a responder com `54` produtos depois da restauracao do SQLite.
 - O dashboard local carregou sem erro de console e sem quebrar o healthcheck.
+- O backend local esta pronto para testar upload de imagem com marca d'agua.
+
+### Divergencia conhecida entre local e producao
+
+- Local e producao nao estao com o mesmo estado de dados.
+- O `shop-api` local respondeu com `54` produtos.
+- O `shop-api` publico respondeu com `0` produtos.
+- Apos essa confirmacao, nenhuma nova alteracao foi aplicada em producao nesta rodada.
 
 ## Arquivos mais importantes
 
@@ -66,6 +83,10 @@ Validado com o servidor local em `PORT=3050`:
   - [index-worker.js](file:///e:/venture-casadinamo/backend/index-worker.js)
 - Scripts do backend:
   - [package.json](file:///e:/venture-casadinamo/backend/package.json)
+- Plugin de marca d'agua:
+  - [image-watermark.plugin.js](file:///e:/venture-casadinamo/backend/src/plugins/image-watermark.plugin.js)
+- Asset da marca d'agua:
+  - `backend/src/plugins/images/watermark.png`
 
 ## Correcoes que deram certo
 
@@ -150,6 +171,46 @@ Foi corrigido em [patch-vendure-ui.js](file:///e:/venture-casadinamo/backend/pat
 - manter `/health` no caso padrao
 - transformar `adminApiPath` com base path em `/api/admin/health`
 
+### 9. SQLite local restaurado com schema completado
+
+O backup local em `bk-vendure` continha os dados do SQLite, mas nao continha o schema completo esperado pela versao atual do Vendure.
+
+Sintoma observado:
+
+- `no such table: asset_translation`
+
+Correcao aplicada:
+
+- restauracao do `vendure.sqlite` a partir do backup local
+- restauracao dos `static/assets` locais
+- sincronizacao local controlada por ambiente para completar o schema sem apagar os dados restaurados
+
+Resultado:
+
+- o local voltou a subir
+- a tela de imagens deixou de quebrar por falta da tabela `asset_translation`
+- os dados principais do SQLite local voltaram
+
+### 10. Marca d'agua restaurada
+
+O plugin de marca d'agua dependia de um PNG fora do Git e o arquivo havia sumido do workspace.
+
+Arquivo restaurado:
+
+- `backend/src/plugins/images/watermark.png`
+
+Origem usada na restauracao:
+
+- `backend_deploy/watermark.png`
+
+Correcao aplicada no plugin:
+
+- resolucao do `watermark.png` por caminhos candidatos em `src` e `dist/src`
+
+Correcao aplicada no build:
+
+- copia da pasta `src/plugins/images` para `dist/src/plugins/images`
+
 ## Ajustes locais aplicados nesta rodada
 
 ### `src/vendure-config.backup.js`
@@ -159,6 +220,8 @@ Mudancas principais:
 - `withBasePath` passou a ser declarado antes do uso
 - `adminUiApiHost` passou para `'auto'`
 - `adminUiAdminApiPath` passou a usar `withBasePath('admin-api')`
+- `sqliteDbExists` passou a ser registrado no debug de configuracao
+- `shouldSynchronizeSqlite` passou a poder ser ativado por `SQLITE_SYNCHRONIZE=true`
 
 ### `src/vendure-config.ts`
 
@@ -174,6 +237,29 @@ Mudancas principais:
 - patch do `vendure-admin-ui-core.mjs`
 - correcao idempotente para substituir tanto a versao original quanto a versao quebrada do patch anterior
 - preservacao dos patches existentes de locale e coluna de shipping
+
+### `src/plugins/image-watermark.plugin.js`
+
+Mudancas principais:
+
+- restauracao da procura do `watermark.png`
+- busca por caminhos robustos em `src/plugins/images` e `dist/src/plugins/images`
+- preservacao do comportamento de aplicar overlays em mosaico
+
+### `package.json`
+
+Mudancas principais:
+
+- o script `build` agora copia `src/plugins/images` para `dist/src/plugins/images`
+
+### `.github/workflows/deploy-backend.yml`
+
+Mudancas principais:
+
+- o install remoto foi ajustado localmente para remover apenas `better-sqlite3` do `package.json` e `package-lock.json` no servidor antes do `npm ci`
+- isso evita recompilacao do SQLite no cPanel
+- isso preserva a instalacao de `sharp`
+- este ajuste ainda precisa ser enviado para o remoto
 
 ## Como validar localmente
 
@@ -192,6 +278,17 @@ $env:PORT=3050
 node dist/index.js
 ```
 
+### Servidor local compilado com sincronizacao pontual do SQLite
+
+Usar apenas quando um backup antigo do `vendure.sqlite` vier com schema incompleto:
+
+```bash
+cd backend
+$env:PORT=3050
+$env:SQLITE_SYNCHRONIZE='true'
+node dist/index.js
+```
+
 ### URLs locais esperadas
 
 - `http://localhost:3050/api/admin/`
@@ -199,6 +296,7 @@ node dist/index.js
 - `http://localhost:3050/api/admin/health?languageCode=pt_BR`
 - `http://localhost:3050/api/admin/vendure-ui-config.json`
 - `http://localhost:3050/api/admin-api`
+- `http://localhost:3050/api/admin/catalog/assets`
 
 ## Como validar em producao apos a esteira
 
@@ -242,6 +340,17 @@ Validar que a API continua acessivel em:
 
 - `https://casadinamo.com.br/api/admin-api`
 
+### 5. Confirmar estado real dos dados
+
+Comparar rapidamente:
+
+- `https://casadinamo.com.br/api/shop-api`
+- `http://localhost:3050/api/shop-api`
+
+Observacao:
+
+- no estado mais recente observado, producao respondeu `0` produtos e o local respondeu `54`
+
 ## Commits importantes recentes
 
 - `a5c3812` - `Fix admin UI health route under /api`
@@ -253,6 +362,7 @@ Observacao:
 
 - houve varios commits anteriores durante a fase de correcao de deploy, banco e Admin UI
 - este commit acima concentra a correcao final local para `/api/admin/health`
+- as correcoes mais recentes de SQLite local, workflow remoto para ignorar `better-sqlite3` e restauracao da marca d'agua ainda estavam locais no momento desta atualizacao do handoff
 
 ## Segredos e cuidados
 
@@ -267,8 +377,9 @@ Observacao:
 
 O proximo passo, a partir deste estado, e:
 
-1. fazer push no `master`
-2. aguardar a esteira terminar
-3. validar `https://casadinamo.com.br/api/admin`
-4. validar `https://casadinamo.com.br/api/admin/health?languageCode=pt_BR`
-5. confirmar se o comportamento em producao bate com o validado localmente
+1. validar localmente um upload real de imagem com a marca d'agua restaurada
+2. revisar se o efeito visual da marca d'agua esta correto
+3. decidir quando enviar o ajuste do workflow que ignora apenas `better-sqlite3` no cPanel
+4. depois do push, validar `https://casadinamo.com.br/api/admin`
+5. validar `https://casadinamo.com.br/api/admin/health?languageCode=pt_BR`
+6. confirmar por que a producao esta com `0` produtos apesar de o local restaurado ter `54`

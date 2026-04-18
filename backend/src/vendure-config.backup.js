@@ -85,12 +85,16 @@ const sqliteDbPath = resolveRuntimePath([
     path_1.default.join(__dirname, '../vendure.sqlite'),
     path_1.default.join(__dirname, '../../vendure.sqlite'),
 ]);
+const sqliteDbExists = fs_1.default.existsSync(sqliteDbPath);
+const shouldSynchronizeSqlite = process.env.SQLITE_SYNCHRONIZE === 'true' || !sqliteDbExists;
 appendConfigDebug('database flags', {
     appBasePath,
     adminUiApiHost,
     adminUiAdminApiPath,
     isPostgres,
     shouldSynchronize,
+    sqliteDbExists,
+    shouldSynchronizeSqlite,
     staticAssetsDir,
     emailOutputDir,
     emailTemplatesDir,
@@ -112,7 +116,7 @@ const dbConnectionOptions = isPostgres
     }
     : {
         type: 'better-sqlite3',
-        synchronize: false,
+        synchronize: shouldSynchronizeSqlite,
         migrations: [path_1.default.join(__dirname, './migrations/*.+(js|ts)')],
         logging: false,
         database: sqliteDbPath,
